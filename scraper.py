@@ -33,7 +33,7 @@ def extract_next_links(url, resp):
                 unique_URLs.add(clean_url)
             else:
                 print("URL is invalid: " + clean_url)
-    print()
+    print("------------------------------")
     return new_links
 
     # Implementation required.
@@ -56,12 +56,6 @@ def is_valid(url):
         path = parsed.path
         scheme = parsed.scheme
         query = parsed.query
-        # print("Scheme: " + scheme)
-        # print("Domain: " + domain)
-        # print("Path: " + path)
-        # print("Query: " + query)
-
-
 
         if scheme not in set(["http", "https"]):
             return False
