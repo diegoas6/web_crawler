@@ -24,8 +24,13 @@ def extract_next_links(url, resp):
     links = soup.find_all('a')
     for link in links:
         href = link.get('href')
-        if href and is_valid(href):
-            new_links.append(href)
+        parsed = urlparse(href)
+        domain = parsed.netloc
+        path = parsed.path
+        scheme = parsed.scheme
+        link = urlparse(scheme + "://" + domain + path)
+        if href and is_valid(link):
+            new_links.append(link)
 
     return new_links
 
@@ -48,6 +53,11 @@ def is_valid(url):
         parsed = urlparse(url)
         domain = parsed.netloc
         path = parsed.path
+        scheme = parsed.scheme
+
+
+        if scheme not in set(["http", "https"]):
+            return False
 
         if not(domain.endswith(".ics.uci.edu")
                or domain.endswith(".cs.uci.edu")
@@ -55,9 +65,6 @@ def is_valid(url):
                or domain.endswith(".stat.uci.edu")
                or (domain.endswith(".today.uci.edu")
                    and path.startswith("/department/information_computer_sciences/"))):
-            return False
-
-        if parsed.scheme not in set(["http", "https"]):
             return False
 
         return not re.match(
