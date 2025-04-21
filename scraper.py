@@ -71,7 +71,7 @@ def is_valid(url):
             return False
 
         if ("share=" or "action=login" or "pwd=" or "format=" or "page="
-            or "action=download" or "upname=") in query:
+            or "action=download" or "upname=" or "ical=") in query:
             return False
 
         return not re.match(
