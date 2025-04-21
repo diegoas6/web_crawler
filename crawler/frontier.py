@@ -50,7 +50,7 @@ class Frontier(object):
     def get_tbd_url(self):
         try:
             return self.to_be_downloaded.pop()
-            # print(f"[FRONTIER] Quedan {len(self.to_be_downloaded)} URLs en la frontera")
+            print(f"[FRONTIER] Quedan {len(self.to_be_downloaded)} URLs en la frontera")
         except IndexError:
             return None
 
@@ -61,7 +61,7 @@ class Frontier(object):
             self.save[urlhash] = (url, False)
             self.save.sync()
             self.to_be_downloaded.append(url)
-            # print(f"[FRONTIER] URLs por descargar: {len(self.to_be_downloaded)}")
+            print(f"[FRONTIER] URLs por descargar: {len(self.to_be_downloaded)}")
     
     def mark_url_complete(self, url):
         urlhash = get_urlhash(url)
