@@ -9,7 +9,11 @@ def scraper(url, resp):
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
-    if resp.status != 200 or resp.raw_response is None:
+    if resp.status != 200 or not resp.raw_response:
+        return []
+
+    content_type = resp.headers.get('content-type')
+    if "text/html" not in content_type:
         return []
 
 
