@@ -24,13 +24,15 @@ def extract_next_links(url, resp):
     for link in links:
         href = link.get('href')
         if href:
-            print(href)
+            print("Raw URL: " + href)
             clean_url, _ = urldefrag(href)
             print("Cleaned URL: " + clean_url)
             if is_valid(clean_url):
                 print("URL is valid: " + clean_url)
                 new_links.append(clean_url)
                 unique_URLs.add(clean_url)
+            else:
+                print("URL is invalid: " + clean_url)
     print()
     return new_links
 
@@ -54,10 +56,10 @@ def is_valid(url):
         path = parsed.path
         scheme = parsed.scheme
         query = parsed.query
-        print("Scheme: " + scheme)
-        print("Domain: " + domain)
-        print("Path: " + path)
-        print("Query: " + query)
+        # print("Scheme: " + scheme)
+        # print("Domain: " + domain)
+        # print("Path: " + path)
+        # print("Query: " + query)
 
 
 
