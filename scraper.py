@@ -24,17 +24,17 @@ def extract_next_links(url, resp):
     for link in links:
         href = link.get('href')
         if href:
-            print("Raw URL: " + href)
+            # print("Raw URL: " + href)
             clean_url, _ = urldefrag(href)
-            print("Cleaned URL: " + clean_url)
+            # print("Cleaned URL: " + clean_url)
             if is_valid(clean_url):
-                print("URL is valid: " + clean_url)
-                print("------------------------------")
+                # print("URL is valid: " + clean_url)
+                # print("------------------------------")
                 new_links.append(clean_url)
                 unique_URLs.add(clean_url)
             else:
-                print("URL is invalid: " + clean_url)
-                print("------------------------------")
+                # print("URL is invalid: " + clean_url)
+                # print("------------------------------")
 
     return new_links
 
