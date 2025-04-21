@@ -49,9 +49,6 @@ def is_valid(url):
         domain = parsed.netloc
         path = parsed.path
 
-        if domain in visited_urls or domain == "":
-            return False
-
         if not(domain.endswith(".ics.uci.edu")
                or domain.endswith(".cs.uci.edu")
                or domain.endswith(".informatics.uci.edu")
@@ -62,7 +59,7 @@ def is_valid(url):
 
         if parsed.scheme not in set(["http", "https"]):
             return False
-        
+
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
