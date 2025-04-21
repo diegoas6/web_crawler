@@ -20,7 +20,7 @@ def extract_next_links(url, resp):
     new_links = []
     unique_URLs = set()
     links = soup.find_all('a')
-    
+
     for link in links:
         href = link.get('href')
         if href:
@@ -50,6 +50,7 @@ def is_valid(url):
         domain = parsed.netloc
         path = parsed.path
         scheme = parsed.scheme
+        query = parsed.query
 
 
         if scheme not in set(["http", "https"]):
@@ -61,6 +62,9 @@ def is_valid(url):
                or domain.endswith(".stat.uci.edu")
                or (domain.endswith(".today.uci.edu")
                    and path.startswith("/department/information_computer_sciences/"))):
+            return False
+
+        if ("share=" or "action=login" or "pwd=" or "format=" or "page=") in query:
             return False
 
         return not re.match(
