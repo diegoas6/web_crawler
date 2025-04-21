@@ -2,6 +2,12 @@ import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urldefrag
 
+def is_relevant(text):
+    words = text.split()
+    if len(words) < 100:
+        return False
+    else:
+        return True
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -27,7 +33,8 @@ def extract_next_links(url, resp):
             # print("Raw URL: " + href)
             clean_url, _ = urldefrag(href)
             # print("Cleaned URL: " + clean_url)
-            if is_valid(clean_url):
+            text = soup.get_text(separator = ' ', strip = True)
+            if is_valid(clean_url) and is_relevant(text):
                 # print("URL is valid: " + clean_url)
                 # print("------------------------------")
                 new_links.append(clean_url)
