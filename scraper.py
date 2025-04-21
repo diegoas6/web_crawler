@@ -11,7 +11,8 @@ def scraper(url, resp):
 def extract_next_links(url, resp):
     if resp.status != 200 or resp.raw_response is None:
         return []
-    
+
+
     visited_urls.add(url)
     soup = BeautifulSoup(resp.raw_response.content, 'lxml')
 
