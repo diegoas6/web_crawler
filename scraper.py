@@ -70,7 +70,8 @@ def is_valid(url):
                    and path.startswith("/department/information_computer_sciences/"))):
             return False
 
-        if ("share=" or "action=login" or "pwd=" or "format=" or "page=") in query:
+        if ("share=" or "action=login" or "pwd=" or "format=" or "page="
+            or "action=download" or "upname=") in query:
             return False
 
         return not re.match(
