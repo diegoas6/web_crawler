@@ -5,6 +5,9 @@ from urllib.parse import urlparse, urldefrag
 def is_relevant(text):
     words = text.split()
     if len(words) < 100:
+        for i in range (5):
+            print("Not enough words in text")
+        return False
         return False
     else:
         return True
