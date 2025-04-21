@@ -71,7 +71,7 @@ def is_valid(url):
             return False
 
         bad_params = {"share=", "action=login", "pwd=", "format=", "page=",
-                      "action=download", "upname=", "ical="}
+                      "action=download", "upname=", "ical=", "action=edit"}
 
         for param in bad_params:
             if param in query:
