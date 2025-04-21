@@ -25,7 +25,9 @@ def extract_next_links(url, resp):
         href = link.get('href')
         if href:
             clean_url, _ = urldefrag(href)
+            print("Cleaned URL: " + clean_url)
             if is_valid(clean_url):
+                print("URL is valid: " + clean_url)
                 new_links.append(clean_url)
                 unique_URLs.add(clean_url)
 
@@ -51,6 +53,11 @@ def is_valid(url):
         path = parsed.path
         scheme = parsed.scheme
         query = parsed.query
+        print("Scheme: " + scheme)
+        print("Domain: " + domain)
+        print("Path: " + path)
+        print("Query: " + query)
+
 
 
         if scheme not in set(["http", "https"]):
