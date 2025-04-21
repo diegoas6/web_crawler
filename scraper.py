@@ -1,11 +1,29 @@
 import re
+from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+
+visited_urls = set()
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
+    if resp.status != 200 or resp.raw_response is None:
+        return []
+    
+    visited_urls.add(url)
+    soup = BeautifulSoup(resp.raw_response.content, 'lxml')
+
+    new_links = []
+    links = soup.find_all('a')
+    for link in links:
+        href = link.get('href')
+        if href and is_valid(href):
+            new_links.append(href)
+
+    return new_links
+
     # Implementation required.
     # url: the URL that was used to get the page
     # resp.url: the actual url of the page
