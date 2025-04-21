@@ -70,9 +70,12 @@ def is_valid(url):
                    and path.startswith("/department/information_computer_sciences/"))):
             return False
 
-        if ("share=" or "action=login" or "pwd=" or "format=" or "page="
-            or "action=download" or "upname=" or "ical=") in query:
-            return False
+        bad_params = {"share=", "action=login", "pwd=", "format=", "page=",
+                      "action=download", "upname=", "ical="}
+
+        for param in bad_params:
+            if param in query:
+                return False
 
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
