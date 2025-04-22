@@ -14,16 +14,19 @@ def is_relevant(text):
     common_words = sum(1 for w in words if w in stop_words)
 
     if word_count < 100:
-        print("Descartada: muy poco texto")
-        return False
+        for i in range (5):
+            print("Irrelevant: Less than 100 words")
+            return False
 
     if unique_words < 40:
-        print("Descartada: poco contenido único")
-        return False
+        for i in range(5):
+            print("Irrelevant: Less than 40 unique words")
+            return False
 
     if common_words / word_count > 0.3:
-        print("Descartada: muchas palabras vacías/comunes")
-        return False
+        for i in range(5):
+            print("Irrelevant: too many common words")
+            return False
 
     return True
 
