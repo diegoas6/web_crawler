@@ -30,14 +30,17 @@ def extract_next_links(url, resp):
     unique_URLs = set()
     links = soup.find_all('a')
 
+    text = soup.get_text(separator=" ", strip=True)
+    if not is_relevant(text):
+        return [] 
+
     for link in links:
         href = link.get('href')
         if href:
             # print("Raw URL: " + href)
             clean_url, _ = urldefrag(href)
             # print("Cleaned URL: " + clean_url)
-            text = soup.get_text(separator = ' ', strip = True)
-            if is_valid(clean_url) and is_relevant(text):
+            if is_valid(clean_url):
                 # print("URL is valid: " + clean_url)
                 # print("------------------------------")
                 new_links.append(clean_url)
