@@ -3,14 +3,30 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urldefrag
 
 def is_relevant(text):
-    words = text.split()
-    if len(words) < 100:
-        for i in range (5):
-            print("Not enough words in text")
+    words = re.findall(r'\w+', text.lower())
+    word_count = len(words)
+    unique_words = len(set(words))
+
+    stop_words = {'search', 'subscribe', 'select', 'today', 'event', 'navigation',
+                  'calendar', 'keyword', 'view', 'previous', 'next', 'contact',
+                  'login', 'signup', 'home', 'menu', 'back'}
+
+    common_words = sum(1 for w in words if w in stop_words)
+
+    if word_count < 100:
+        print("Descartada: muy poco texto")
         return False
+
+    if unique_words < 40:
+        print("Descartada: poco contenido único")
         return False
-    else:
-        return True
+
+    if common_words / word_count > 0.3:
+        print("Descartada: muchas palabras vacías/comunes")
+        return False
+
+    return True
+
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -32,7 +48,7 @@ def extract_next_links(url, resp):
 
     text = soup.get_text(separator=" ", strip=True)
     if not is_relevant(text):
-        return [] 
+        return []
 
     for link in links:
         href = link.get('href')
