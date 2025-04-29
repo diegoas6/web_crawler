@@ -66,11 +66,14 @@ def extract_next_links(url, resp):
             # print("Raw URL: " + href)
             clean_url, _ = urldefrag(href)
             # print("Cleaned URL: " + clean_url)
-            if is_valid(clean_url):
-                # print("URL is valid: " + clean_url)
-                # print("------------------------------")
-                new_links.append(clean_url)
-                unique_URLs.add(clean_url)
+            try:
+                if is_valid(clean_url):
+                    # print("URL is valid: " + clean_url)
+                    # print("------------------------------")
+                    new_links.append(clean_url)
+                    unique_URLs.add(clean_url)
+            except Exception as e:
+                print(f"[ERROR] is_valid falló para URL {clean_url}: {e}")
             # else:
             # print("URL is invalid: " + clean_url)
             # print("------------------------------")
@@ -93,7 +96,11 @@ def is_valid(url):
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
-        parsed = urlparse(url)
+        try:
+            parsed = urlparse(url)
+        except Exception as e:
+            print(f"[WARNING] Error trying to parse URL: {url} — {e}")
+            return False
         domain = parsed.netloc
         path = parsed.path
         scheme = parsed.scheme
