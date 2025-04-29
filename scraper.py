@@ -2,7 +2,7 @@ import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urldefrag
 
-
+unique_pages = set()
 def is_relevant(text):
     words = re.findall(r'\w+', text.lower())
     word_count = len(words)
@@ -44,6 +44,11 @@ def extract_next_links(url, resp):
     content_type = resp.raw_response.headers.get('content-type')
     if "text/html" not in content_type:
         return []
+
+    if url not in unique_pages:
+        unique_pages.add(url)
+        if len(unique_pages) % 100 == 0:
+            print(f"[INFO] Unique pages found: {len(unique_pages)}")
 
     soup = BeautifulSoup(resp.raw_response.content, 'lxml')
 
@@ -95,7 +100,7 @@ def is_valid(url):
         query = parsed.query
 
         if scheme not in set(["http", "https"]):
-            print("Filtered:", url, " not http or https")
+            # print("Filtered: not http or https")
             return False
 
         if not (domain.endswith(".ics.uci.edu")
@@ -104,7 +109,7 @@ def is_valid(url):
                 or domain.endswith(".stat.uci.edu")
                 or (domain.endswith(".today.uci.edu")
                     and path.startswith("/department/information_computer_sciences/"))):
-            print("Filtered:", url, " not in permitted domain")
+            # print("Filtered: not in permitted domain")
             return False
 
         bad_params = {"share=", "action=login", "pwd=", "format=", "page=",
@@ -112,7 +117,7 @@ def is_valid(url):
                       "replytocom=", "print=", "session="}
 
         if any(p in query for p in bad_params):
-            print("Filtered:", url, "bad parameters in query")
+            print("Filtered: bad parameters in query")
             return False
 
         if len(query.split("&")) > 5:
@@ -121,7 +126,7 @@ def is_valid(url):
 
         date_pattern = re.compile(r"\d{4}-\d{2}(-\d{2})?")
         if date_pattern.search(path) or date_pattern.search(query):
-            print("Filtered:", url, " is a date pattern")
+            print("Filtered: is a date pattern")
             return False
 
         calendar_keywords = [
@@ -133,12 +138,12 @@ def is_valid(url):
             return False
 
         if re.search(r"(\/[^\/]+)\1{2,}", path):
-            print("Filtered:", url, "repeated paths")
+            print("Filtered: repeated paths")
             return False
 
         bad_paths = ["/pmwiki/", "/layoutvariables", "/includeotherpages", "/charges"]
         if any(bp in path for bp in bad_paths):
-            print("Filtered:", url, " is a bad path")
+            print("Filtered: is a bad path")
             return False
 
         return not re.match(
