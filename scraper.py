@@ -117,7 +117,7 @@ def is_valid(url):
                       "replytocom=", "print=", "session="}
 
         if any(p in query for p in bad_params):
-            print("Filtered: bad parameters in query")
+            # print("Filtered: bad parameters in query")
             return False
 
         if len(query.split("&")) > 5:
@@ -130,7 +130,7 @@ def is_valid(url):
             return False
 
         calendar_keywords = [
-            "ical", "calendar", "event", "events", "month=", "year=",
+            "ical", "calendar", "month=", "year=",
             "day=", "date=", "tribe-bar-date", "event-display", "week=", "day"
         ]
         if any(kw in path or kw in query for kw in calendar_keywords):
