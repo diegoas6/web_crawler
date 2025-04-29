@@ -95,6 +95,7 @@ def is_valid(url):
         query = parsed.query
 
         if scheme not in set(["http", "https"]):
+            print("Filtered:", url, " not http or https")
             return False
 
         if not (domain.endswith(".ics.uci.edu")
@@ -103,6 +104,7 @@ def is_valid(url):
                 or domain.endswith(".stat.uci.edu")
                 or (domain.endswith(".today.uci.edu")
                     and path.startswith("/department/information_computer_sciences/"))):
+            print("Filtered:", url, " not in permitted domain")
             return False
 
         bad_params = {"share=", "action=login", "pwd=", "format=", "page=",
@@ -110,13 +112,16 @@ def is_valid(url):
                       "replytocom=", "print=", "session="}
 
         if any(p in query for p in bad_params):
+            print("Filtered:", url, "bad parameters in query")
             return False
 
         if len(query.split("&")) > 5:
+            print("Filtered:", url, "too many queries" )
             return False
 
         date_pattern = re.compile(r"\d{4}-\d{2}(-\d{2})?")
         if date_pattern.search(path) or date_pattern.search(query):
+            print("Filtered:", url, " is a date pattern")
             return False
 
         calendar_keywords = [
@@ -124,13 +129,16 @@ def is_valid(url):
             "day=", "date=", "tribe-bar-date", "event-display", "week=", "day"
         ]
         if any(kw in path or kw in query for kw in calendar_keywords):
+            print("Filtered:", url, " calendar in query or path")
             return False
 
         if re.search(r"(\/[^\/]+)\1{2,}", path):
+            print("Filtered:", url, "repeated paths")
             return False
 
         bad_paths = ["/pmwiki/", "/layoutvariables", "/includeotherpages", "/charges"]
         if any(bp in path for bp in bad_paths):
+            print("Filtered:", url, " is a bad path")
             return False
 
         return not re.match(
