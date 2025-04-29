@@ -42,6 +42,9 @@ def extract_next_links(url, resp):
         return []
 
     content_type = resp.raw_response.headers.get('content-type')
+    if not content_type or "text/html" not in content_type.lower():
+        return []
+
     if "text/html" not in content_type:
         return []
 
