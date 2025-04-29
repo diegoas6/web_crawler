@@ -76,7 +76,7 @@ def extract_next_links(url, resp):
                     new_links.append(clean_url)
                     unique_URLs.add(clean_url)
             except Exception as e:
-                print(f"[ERROR] is_valid falló para URL {clean_url}: {e}")
+                print(f"[ERROR] is_valid failed for URL {clean_url}: {e}")
             # else:
             # print("URL is invalid: " + clean_url)
             # print("------------------------------")
@@ -99,11 +99,7 @@ def is_valid(url):
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
-        try:
-            parsed = urlparse(url)
-        except Exception as e:
-            print(f"[WARNING] Error trying to parse URL: {url} — {e}")
-            return False
+        parsed = urlparse(url)
         domain = parsed.netloc
         path = parsed.path
         scheme = parsed.scheme
@@ -139,13 +135,13 @@ def is_valid(url):
             print("Filtered: is a date pattern")
             return False
 
-        calendar_keywords = [
-            "ical", "calendar", "month=", "year=",
-            "day=", "date=", "tribe-bar-date", "event-display", "week=", "day"
-        ]
-        if any(kw in path or kw in query for kw in calendar_keywords):
-            print("Filtered:", url, " calendar in query or path")
-            return False
+        # calendar_keywords = [
+        #     "ical", "calendar", "month=", "year=",
+        #     "day=", "date=", "tribe-bar-date", "event-display", "week=", "day"
+        # ]
+        # if any(kw in path or kw in query for kw in calendar_keywords):
+        #     print("Filtered:", url, " calendar in query or path")
+        #     return False
 
         if re.search(r"(\/[^\/]+)\1{2,}", path):
             print("Filtered: repeated paths")
