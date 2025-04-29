@@ -60,8 +60,8 @@ def extract_next_links(url, resp):
     links = soup.find_all('a')
 
     text = soup.get_text(separator=" ", strip=True)
-    if not is_relevant(text):
-        return []
+    # if not is_relevant(text):
+    #     return []
 
     for link in links:
         href = link.get('href')
@@ -127,12 +127,12 @@ def is_valid(url):
             return False
 
         if len(query.split("&")) > 5:
-            print("Filtered:", url, "too many queries" )
+            # print("Filtered:", url, "too many queries" )
             return False
 
         date_pattern = re.compile(r"\d{4}-\d{2}(-\d{2})?")
         if date_pattern.search(path) or date_pattern.search(query):
-            print("Filtered: is a date pattern")
+            # print("Filtered: is a date pattern")
             return False
 
         # calendar_keywords = [
@@ -144,12 +144,12 @@ def is_valid(url):
         #     return False
 
         if re.search(r"(\/[^\/]+)\1{2,}", path):
-            print("Filtered: repeated paths")
+            # print("Filtered: repeated paths")
             return False
 
         bad_paths = ["/pmwiki/", "/layoutvariables", "/includeotherpages", "/charges"]
         if any(bp in path for bp in bad_paths):
-            print("Filtered: is a bad path")
+            # print("Filtered: is a bad path")
             return False
 
         return not re.match(
