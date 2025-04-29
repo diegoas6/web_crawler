@@ -120,7 +120,7 @@ def is_valid(url):
 
         bad_params = {"share=", "action=login", "pwd=", "format=", "page=",
                       "action=download", "upname=", "ical=", "action=edit",
-                      "replytocom=", "print=", "session="}
+                      "replytocom=", "print=", "session=", "redirect_to="}
 
         if any(p in query for p in bad_params):
             # print("Filtered: bad parameters in query")
