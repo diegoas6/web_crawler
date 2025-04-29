@@ -2,6 +2,7 @@ import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urldefrag
 
+
 def is_relevant(text):
     words = re.findall(r'\w+', text.lower())
     word_count = len(words)
@@ -14,7 +15,7 @@ def is_relevant(text):
     common_words = sum(1 for w in words if w in stop_words)
 
     if word_count < 100:
-        for i in range (5):
+        for i in range(5):
             print("Irrelevant: Less than 100 words")
             return False
 
@@ -34,6 +35,7 @@ def is_relevant(text):
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
+
 
 def extract_next_links(url, resp):
     if resp.status != 200 or not resp.raw_response:
@@ -65,8 +67,8 @@ def extract_next_links(url, resp):
                 new_links.append(clean_url)
                 unique_URLs.add(clean_url)
             # else:
-                # print("URL is invalid: " + clean_url)
-                # print("------------------------------")
+            # print("URL is invalid: " + clean_url)
+            # print("------------------------------")
 
     return new_links
 
@@ -79,6 +81,7 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
+
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
@@ -94,20 +97,41 @@ def is_valid(url):
         if scheme not in set(["http", "https"]):
             return False
 
-        if not(domain.endswith(".ics.uci.edu")
-               or domain.endswith(".cs.uci.edu")
-               or domain.endswith(".informatics.uci.edu")
-               or domain.endswith(".stat.uci.edu")
-               or (domain.endswith(".today.uci.edu")
-                   and path.startswith("/department/information_computer_sciences/"))):
+        if not (domain.endswith(".ics.uci.edu")
+                or domain.endswith(".cs.uci.edu")
+                or domain.endswith(".informatics.uci.edu")
+                or domain.endswith(".stat.uci.edu")
+                or (domain.endswith(".today.uci.edu")
+                    and path.startswith("/department/information_computer_sciences/"))):
             return False
 
         bad_params = {"share=", "action=login", "pwd=", "format=", "page=",
-                      "action=download", "upname=", "ical=", "action=edit"}
+                      "action=download", "upname=", "ical=", "action=edit",
+                      "replytocom=", "print=", "session="}
 
-        for param in bad_params:
-            if param in query:
-                return False
+        if any(p in query for p in bad_params):
+            return False
+
+        if len(query.split("&")) > 5:
+            return False
+
+        date_pattern = re.compile(r"\d{4}-\d{2}(-\d{2})?")
+        if date_pattern.search(path) or date_pattern.search(query):
+            return False
+
+        calendar_keywords = [
+            "ical", "calendar", "event", "events", "month=", "year=",
+            "day=", "date=", "tribe-bar-date", "event-display", "week=", "day"
+        ]
+        if any(kw in path or kw in query for kw in calendar_keywords):
+            return False
+
+        if re.search(r"(\/[^\/]+)\1{2,}", path):
+            return False
+
+        bad_paths = ["/pmwiki/", "/layoutvariables", "/includeotherpages", "/charges"]
+        if any(bp in path for bp in bad_paths):
+            return False
 
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -119,6 +143,7 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
+
     except TypeError:
-        print ("TypeError for ", parsed)
+        print("TypeError for ", parsed)
         raise
