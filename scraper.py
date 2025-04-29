@@ -147,10 +147,10 @@ def is_valid(url):
             # print("Filtered: repeated paths")
             return False
 
-        bad_paths = ["/pmwiki/", "/layoutvariables", "/includeotherpages", "/charges"]
-        if any(bp in path for bp in bad_paths):
-            # print("Filtered: is a bad path")
-            return False
+        # bad_paths = ["/pmwiki/", "/layoutvariables", "/includeotherpages", "/charges"]
+        # if any(bp in path for bp in bad_paths):
+        #     # print("Filtered: is a bad path")
+        #     return False
 
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
