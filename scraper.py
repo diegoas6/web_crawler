@@ -84,11 +84,8 @@ def is_valid(url):
         if any(p in query for p in bad_params):
             return False
 
-        if len(query.split("&")) > 5:
-            return False
-
         date_pattern = re.compile(r"\d{4}-\d{2}(-\d{2})?")
-        if date_pattern.search(path) or date_pattern.search(query):
+        if date_pattern.search(query):
             return False
 
         return not re.match(
