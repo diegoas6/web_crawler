@@ -79,7 +79,8 @@ def is_valid(url):
 
         bad_params = {"share=", "action=login", "pwd=", "format=",
                       "action=download", "upname=", "ical=", "action=edit",
-                      "replytocom=", "print=", "session=", "redirect_to="}
+                      "replytocom=", "print=", "session=", "redirect_to=",
+                      "post_type="}
 
         if any(p in query for p in bad_params):
             return False
@@ -93,8 +94,6 @@ def is_valid(url):
 
         if re.search(r'/events/.*/(19|20)\d{2}-\d{2}', path):
             return False
-
-        
 
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
