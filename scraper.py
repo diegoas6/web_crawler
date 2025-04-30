@@ -88,7 +88,7 @@ def is_valid(url):
         if date_pattern.search(query):
             return False
 
-        if re.search(r'/day/(19|20)\d{2}-\d{2}-\d{2}', path):
+        if re.search(r'/events/.*/(19|20)\d{2}-\d{2}', path):
             return False
 
         return not re.match(
