@@ -1,8 +1,36 @@
 import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urldefrag
+from PartA import tokenize
+import json
+from collections import Counter, defaultdict
 
-unique_pages = set()
+with open("stopwords.txt", "r", encoding="utf-8") as f:
+    stopwords = set(w.strip() for w in f.readlines())
+
+word_counter = Counter()
+subdomain_counter = defaultdict(int)
+word_in_page = dict()
+most_word_in_page = ("", 0)
+
+stats_file = "stats.json"
+save_frequency = 100
+
+
+def save_stats():
+    stats = {
+        "unique_pages": len(word_in_page),
+        "most_word_in_page": {
+            "url": most_word_in_page[0],
+            "word_count": most_word_in_page[1]
+        },
+        "top_50_words": word_counter.most_common(50),
+        "subdomains": dict(sorted(subdomain_counter.items())),
+        "word_in_page": word_in_page
+    }
+    with open(stats_file, "w", encoding="utf-8") as f:
+        json.dump(stats, f, indent=2)
+    print(f"[STATS] Stats saved in {stats_file}")
 
 
 def scraper(url, resp):
@@ -21,12 +49,25 @@ def extract_next_links(url, resp):
     if "text/html" not in content_type:
         return []
 
-    if url not in unique_pages:
-        unique_pages.add(url)
-        if len(unique_pages) % 100 == 0:
-            print(f"[INFO] Unique pages found: {len(unique_pages)}")
-
     soup = BeautifulSoup(resp.raw_response.content, 'lxml')
+    text = soup.get_text(separator=" ", strip=True).lower()
+    raw_tokens = tokenize(text)
+    tokens = [t for t in raw_tokens if t not in stopwords and len(t) > 1 and not t.isdigit()]
+
+    word_counter.update(tokens)
+    word_count = len(tokens)
+    word_in_page[url] = word_count
+
+    global most_word_in_page
+    if word_count > most_word_in_page[1]:
+        most_word_in_page = (url, word_count)
+
+    parsed = urlparse(url)
+    if parsed.netloc.endswith(".ics.uci.edu"):
+        subdomain_counter[parsed.netloc] += 1
+
+    if len(word_in_page) % save_frequency == 0:
+        save_stats()
 
     new_links = []
     unique_URLs = set()
@@ -85,14 +126,15 @@ def is_valid(url):
         if any(p in query for p in bad_params):
             return False
 
-        date_pattern = re.compile(r"\d{4}-\d{2}(-\d{2})?")
-        if date_pattern.search(query):
-            return False
-
         if re.search(r'/day/(19|20)\d{2}-\d{2}-\d{2}', path):
             return False
 
+            # /events/.../YYYY-MM
         if re.search(r'/events/.*/(19|20)\d{2}-\d{2}', path):
+            return False
+
+            # /events/YYYY-MM-DD
+        if re.search(r'/events/\d{4}-\d{2}-\d{2}', path):
             return False
 
         return not re.match(
