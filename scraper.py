@@ -46,9 +46,6 @@ def extract_next_links(url, resp):
     if not content_type or "text/html" not in content_type.lower():
         return []
 
-    if "text/html" not in content_type:
-        return []
-
     soup = BeautifulSoup(resp.raw_response.content, 'lxml')
     text = soup.get_text(separator=" ", strip=True).lower()
     raw_tokens = tokenize(text)
@@ -70,7 +67,6 @@ def extract_next_links(url, resp):
         save_stats()
 
     new_links = []
-    unique_URLs = set()
     links = soup.find_all('a')
 
     for link in links:
@@ -80,7 +76,6 @@ def extract_next_links(url, resp):
             try:
                 if is_valid(clean_url):
                     new_links.append(clean_url)
-                    unique_URLs.add(clean_url)
             except Exception as e:
                 print(f"[ERROR] is_valid failed for URL {clean_url}: {e}")
     return new_links
@@ -129,11 +124,6 @@ def is_valid(url):
         if re.search(r'/day/(19|20)\d{2}-\d{2}-\d{2}', path):
             return False
 
-            # /events/.../YYYY-MM
-        if re.search(r'/events/.*/(19|20)\d{2}-\d{2}', path):
-            return False
-
-            # /events/YYYY-MM-DD
         if re.search(r'/events/\d{4}-\d{2}-\d{2}', path):
             return False
 
