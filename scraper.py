@@ -116,7 +116,7 @@ def is_valid(url):
         bad_params = {"share=", "action=login", "pwd=", "format=",
                       "action=download", "upname=", "ical=", "action=edit",
                       "replytocom=", "print=", "session=", "redirect_to=",
-                      "post_type="}
+                      "post_type=", "tribe-bar-date=", "eventDisplay=past"}
 
         if any(p in query for p in bad_params):
             return False
