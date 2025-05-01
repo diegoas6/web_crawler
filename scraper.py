@@ -124,11 +124,11 @@ def is_valid(url):
         if re.search(r'/day/(19|20)\d{2}-\d{2}-\d{2}', path):
             return False
 
-        # if re.search(r'/events/\d{4}-\d{2}-\d{2}', path):
-        #     return False
-        #
-        # if "/events/category/wics-bonding/" in path:
-        #     return False
+        if re.search(r'/events/\d{4}-\d{2}-\d{2}', path):
+            return False
+
+        if re.search(r'/events/month(/\\d{4}-\\d{2})?/?$', path):
+            return False
 
         if "/event/" in path or "/events/" in path:
             with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
