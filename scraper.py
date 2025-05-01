@@ -127,6 +127,9 @@ def is_valid(url):
         if re.search(r'/events/\d{4}-\d{2}-\d{2}', path):
             return False
 
+        if "/events/category/wics-bonding/" in path:
+            return False
+
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
