@@ -102,7 +102,12 @@ def is_valid(url):
         scheme = parsed.scheme
         query = parsed.query
 
+        def log_reason(reason):
+            with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
+                log_file.write(f"[{domain}] Motivo: {reason} → {url}\n")
+
         if scheme not in {"http", "https"}:
+            log_reason("Invalid Scheme")
             return False
 
         if not (domain.endswith(".ics.uci.edu")
@@ -111,6 +116,7 @@ def is_valid(url):
                 or domain.endswith(".stat.uci.edu")
                 or (domain.endswith(".today.uci.edu")
                     and path.startswith("/department/information_computer_sciences/"))):
+            log_reason("Out of permitted domain")
             return False
 
         bad_params = {"share=", "action=login", "pwd=", "format=",
@@ -119,20 +125,23 @@ def is_valid(url):
                       "post_type=", "tribe-bar-date=", "eventDisplay=past"}
 
         if any(p in query for p in bad_params):
+            log_reason("Query bad parameters")
             return False
 
         if re.search(r'/day/(19|20)\d{2}-\d{2}-\d{2}', path):
+            log_reason("Tramp: specific day calendar")
             return False
 
         if re.search(r'/events/\d{4}-\d{2}-\d{2}', path):
+            log_reason("Tramp: /events/date")
             return False
 
         if re.search(r'/events/month(/\\d{4}-\\d{2})?/?$', path):
+            log_reason("Tramp: /events/month/")
             return False
 
         if "/event/" in path or "/events/" in path:
-            with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
-                log_file.write(f"Filtered (event): {url}\n")
+            log_reason("/event/ or /events/")
             return False
 
         return not re.match(
@@ -145,6 +154,8 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
-    except TypeError:
-        print("TypeError for ", parsed)
-        raise
+
+    except Exception as e:
+        with open("filtered_urls.log", "a", encoding="utf-8") as log_file:  ### CAMBIO: Registro de error
+            log_file.write(f"[ERROR] Motivo: Exception ({e}) → {url}\n")
+        return False
