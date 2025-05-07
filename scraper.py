@@ -140,6 +140,11 @@ def is_valid(url):
             log_reason("Tramp: specific day calendar")
             return False
 
+        segments = path.strip("/").split("/")
+        if len(segments) != len(set(segments)):
+            log_reason("Trap: repeated path segments")
+            return False
+
         # Trap: fechas específicas en /events/
         if re.search(r'/events?/\d{4}-\d{2}-\d{2}', path):
             log_reason("Trap: /event(s)/ with specific date")
