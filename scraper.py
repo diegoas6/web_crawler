@@ -132,6 +132,10 @@ def is_valid(url):
             log_reason("Query bad parameters")
             return False
 
+        if "do=diff" in query or "difftype=" in query:
+            log_reason("Diff page in DokuWiki or similar")
+            return False
+
         if re.search(r'/day/(19|20)\d{2}-\d{2}-\d{2}', path):
             log_reason("Tramp: specific day calendar")
             return False
