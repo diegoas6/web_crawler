@@ -1,6 +1,6 @@
 import re
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, urldefrag
+from urllib.parse import urlparse, urldefrag, urljoin
 from PartA import tokenize
 import json
 from collections import Counter, defaultdict
@@ -72,7 +72,8 @@ def extract_next_links(url, resp):
     for link in links:
         href = link.get('href')
         if href:
-            clean_url, _ = urldefrag(href)
+            joined = urljoin(url, href)
+            clean_url, _ = urldefrag(joined)
             try:
                 if is_valid(clean_url):
                     new_links.append(clean_url)
@@ -110,12 +111,15 @@ def is_valid(url):
             log_reason("Invalid Scheme")
             return False
 
-        if not (domain.endswith(".ics.uci.edu")
+        if not (domain == "ics.uci.edu"
+                or domain.endswith(".ics.uci.edu")
+                or domain == "cs.uci.edu"
                 or domain.endswith(".cs.uci.edu")
+                or domain == "informatics.uci.edu"
                 or domain.endswith(".informatics.uci.edu")
+                or domain == "stat.uci.edu"
                 or domain.endswith(".stat.uci.edu")
-                or (domain.endswith(".today.uci.edu")
-                    and path.startswith("/department/information_computer_sciences/"))):
+                or (domain == "today.uci.edu" and path.startswith("/department/information_computer_sciences/"))):
             log_reason("Out of permitted domain")
             return False
 
@@ -132,16 +136,14 @@ def is_valid(url):
             log_reason("Tramp: specific day calendar")
             return False
 
-        if re.search(r'/events/\d{4}-\d{2}-\d{2}', path):
-            log_reason("Tramp: /events/date")
+        # Trap: fechas específicas en /events/
+        if re.search(r'/events?/\d{4}-\d{2}-\d{2}', path):
+            log_reason("Trap: /event(s)/ with specific date")
             return False
 
-        if re.search(r'/events/month(/\\d{4}-\\d{2})?/?$', path):
-            log_reason("Tramp: /events/month/")
-            return False
-
-        if "/event/" in path or "/events/" in path:
-            log_reason("/event/ or /events/")
+        # Trap: /events/month/
+        if re.search(r'/events?/month(/\\d{4}-\\d{2})?/?$', path):
+            log_reason("Trap: /events/month/")
             return False
 
         return not re.match(
