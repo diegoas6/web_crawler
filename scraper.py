@@ -152,7 +152,7 @@ def is_valid(url):
 
         # Trap: /events/month/
         if re.search(r'/events?/month(/\\d{4}-\\d{2})?/?$', path):
-            log_reason("Trap: /events/month/")
+            log_reason("Trap : /events/month/")
             return False
 
         if re.search(r'/events/category/.*/(19|20)\d{2}-\d{2}', path):
