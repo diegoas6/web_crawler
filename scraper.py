@@ -155,6 +155,10 @@ def is_valid(url):
             log_reason("Trap: /events/month/")
             return False
 
+        if re.search(r'/events/category/.*/(19|20)\d{2}-\d{2}', path):
+            log_reason("Trap: /events/category/.../YYYY-MM")
+            return False
+
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
