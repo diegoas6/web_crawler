@@ -52,7 +52,7 @@ def save_stats():
     }
     with open(stats_file, "w", encoding="utf-8") as f:
         json.dump(stats, f, indent=2)
-    print(f"[STATS] Stats saved in {stats_file}")
+    print(f"[STATS] Stats saved in {stats_file} | Unique pages: {len(word_in_page)}")
 
 
 def simhash(tokens):
@@ -99,7 +99,7 @@ def extract_next_links(url, resp):
     # Exact duplicate
     page_hash = hashlib.sha256(text.encode('utf-8')).hexdigest()
     if page_hash in page_hashes:
-        print("Exact")
+        print("Exact duplicate hash → {url}\n")
         with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
             log_file.write(f"[DUPLICATE] Motivo: Exact duplicate hash → {url}\n")
         return []
@@ -109,7 +109,7 @@ def extract_next_links(url, resp):
     fingerprint = simhash(tokens)
     for existing in simhashes:
         if hamming_distance(fingerprint, existing) <= 3:
-            print("Near")
+            print("Near duplicate (SimHash) → {url}\n")
             with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
                 log_file.write(f"[DUPLICATE] Motivo: Near duplicate (SimHash) → {url}\n")
             return []
