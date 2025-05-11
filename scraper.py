@@ -215,6 +215,10 @@ def is_valid(url):
             log_reason("Low-value personal photo page (epstein/pix)")
             return False
 
+        if "/epstein/pix/" in path:
+            log_reason("Low-value personal photo page (epstein/pix)")
+            return False
+
         # GitLab commit and tree views
         if "/-/commit/" in path:
             log_reason("Trap: GitLab commit view")
