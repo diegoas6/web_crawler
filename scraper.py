@@ -207,6 +207,10 @@ def is_valid(url):
             log_reason("Trap: GitLab redundant README views")
             return False
 
+        if re.search(r'~epstein/pix/', path):
+            log_reason("Low-value personal photo page (epstein/pix)")
+            return False
+
         # GitLab commit and tree views
         if "/-/commit/" in path:
             log_reason("Trap: GitLab commit view")
