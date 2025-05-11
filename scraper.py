@@ -5,7 +5,7 @@ from PartA import tokenize
 import json
 from collections import Counter, defaultdict
 import hashlib
-import math
+import os
 
 with open("stopwords.txt", "r", encoding="utf-8") as f:
     stopwords = set(w.strip() for w in f.readlines())
@@ -18,8 +18,41 @@ most_word_in_page = ("", 0)
 stats_file = "stats.json"
 save_frequency = 100
 
-page_hashes = set()  # ← GLOBAL: para exact duplicate detection
+page_hashes = set()  # ← Exact duplicate detection
 simhashes = set()
+
+
+def load_stats():
+    global word_counter, subdomain_counter, word_in_page, most_word_in_page
+    if os.path.exists(stats_file):
+        try:
+            with open(stats_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                word_counter.update(dict(data.get("top_50_words", [])))
+                subdomain_counter.update(data.get("subdomains", {}))
+                word_in_page.update(data.get("word_in_page", {}))
+                most = data.get("most_word_in_page", {})
+                if most and most.get("url") and most.get("word_count", 0) > most_word_in_page[1]:
+                    most_word_in_page = (most["url"], most["word_count"])
+            print(f"[STATS] Cargadas estadísticas desde {stats_file}")
+        except Exception as e:
+            print(f"[STATS] Error al cargar {stats_file}: {e}")
+
+
+def save_stats():
+    stats = {
+        "unique_pages": len(word_in_page),
+        "most_word_in_page": {
+            "url": most_word_in_page[0],
+            "word_count": most_word_in_page[1]
+        },
+        "top_50_words": word_counter.most_common(50),
+        "subdomains": dict(sorted(subdomain_counter.items())),
+        "word_in_page": word_in_page
+    }
+    with open(stats_file, "w", encoding="utf-8") as f:
+        json.dump(stats, f, indent=2)
+    print(f"[STATS] Stats saved in {stats_file}")
 
 
 def simhash(tokens):
@@ -41,20 +74,8 @@ def hamming_distance(x, y):
     return bin(x ^ y).count('1')
 
 
-def save_stats():
-    stats = {
-        "unique_pages": len(word_in_page),
-        "most_word_in_page": {
-            "url": most_word_in_page[0],
-            "word_count": most_word_in_page[1]
-        },
-        "top_50_words": word_counter.most_common(50),
-        "subdomains": dict(sorted(subdomain_counter.items())),
-        "word_in_page": word_in_page
-    }
-    with open(stats_file, "w", encoding="utf-8") as f:
-        json.dump(stats, f, indent=2)
-    print(f"[STATS] Stats saved in {stats_file}")
+# ← Cargar stats al inicio
+load_stats()
 
 
 def scraper(url, resp):
@@ -75,18 +96,20 @@ def extract_next_links(url, resp):
     raw_tokens = tokenize(text)
     tokens = [t for t in raw_tokens if t not in stopwords and len(t) > 1 and not t.isdigit()]
 
-    # EXACT DUPLICATE DETECTION
+    # Exact duplicate
     page_hash = hashlib.sha256(text.encode('utf-8')).hexdigest()
     if page_hash in page_hashes:
+        print("Exact")
         with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
             log_file.write(f"[DUPLICATE] Motivo: Exact duplicate hash → {url}\n")
         return []
     page_hashes.add(page_hash)
 
-    # NEAR DUPLICATE DETECTION
+    # Near duplicate
     fingerprint = simhash(tokens)
     for existing in simhashes:
         if hamming_distance(fingerprint, existing) <= 3:
+            print("Near")
             with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
                 log_file.write(f"[DUPLICATE] Motivo: Near duplicate (SimHash) → {url}\n")
             return []
@@ -108,9 +131,7 @@ def extract_next_links(url, resp):
         save_stats()
 
     new_links = []
-    links = soup.find_all('a')
-
-    for link in links:
+    for link in soup.find_all('a'):
         href = link.get('href')
         if href:
             joined = urljoin(url, href)
@@ -122,21 +143,8 @@ def extract_next_links(url, resp):
                 print(f"[ERROR] is_valid failed for URL {clean_url}: {e}")
     return new_links
 
-    # Implementation required.
-    # url: the URL that was used to get the page
-    # resp.url: the actual url of the page
-    # resp.status: the status code returned by the server. 200 is OK, you got the page. Other numbers mean that there was some kind of problem.
-    # resp.error: when status is not 200, you can check the error here, if needed.
-    # resp.raw_response: this is where the page actually is. More specifically, the raw_response has two parts:
-    #         resp.raw_response.url: the url, again
-    #         resp.raw_response.content: the content of the page!
-    # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-
 
 def is_valid(url):
-    # Decide whether to crawl this url or not. 
-    # If you decide to crawl it, return True; otherwise return False.
-    # There are already some conditions that return False.
     try:
         parsed = urlparse(url)
         domain = parsed.netloc
@@ -195,8 +203,13 @@ def is_valid(url):
             log_reason("Trap: /events/category/.../YYYY-MM")
             return False
 
-        if "/-/commit/" in path and "view=" in query:
-            log_reason("GitLab commit diff view")
+        # GitLab commit and tree views
+        if "/-/commit/" in path:
+            log_reason("Trap: GitLab commit view")
+            return False
+
+        if "/-/tree/" in path:
+            log_reason("Trap: GitLab tree view")
             return False
 
         return not re.match(
@@ -210,6 +223,6 @@ def is_valid(url):
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
     except Exception as e:
-        with open("filtered_urls.log", "a", encoding="utf-8") as log_file:  ### CAMBIO: Registro de error
+        with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
             log_file.write(f"[ERROR] Motivo: Exception ({e}) → {url}\n")
         return False
