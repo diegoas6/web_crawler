@@ -4,6 +4,8 @@ from urllib.parse import urlparse, urldefrag, urljoin
 from PartA import tokenize
 import json
 from collections import Counter, defaultdict
+import hashlib
+import math
 
 with open("stopwords.txt", "r", encoding="utf-8") as f:
     stopwords = set(w.strip() for w in f.readlines())
@@ -15,6 +17,28 @@ most_word_in_page = ("", 0)
 
 stats_file = "stats.json"
 save_frequency = 100
+
+page_hashes = set()  # ← GLOBAL: para exact duplicate detection
+simhashes = set()
+
+
+def simhash(tokens):
+    hashbits = 64
+    v = [0] * hashbits
+    for token in tokens:
+        h = int(hashlib.md5(token.encode('utf-8')).hexdigest(), 16)
+        for i in range(hashbits):
+            bitmask = 1 << i
+            v[i] += 1 if h & bitmask else -1
+    fingerprint = 0
+    for i in range(hashbits):
+        if v[i] > 0:
+            fingerprint |= 1 << i
+    return fingerprint
+
+
+def hamming_distance(x, y):
+    return bin(x ^ y).count('1')
 
 
 def save_stats():
@@ -50,6 +74,23 @@ def extract_next_links(url, resp):
     text = soup.get_text(separator=" ", strip=True).lower()
     raw_tokens = tokenize(text)
     tokens = [t for t in raw_tokens if t not in stopwords and len(t) > 1 and not t.isdigit()]
+
+    # EXACT DUPLICATE DETECTION
+    page_hash = hashlib.sha256(text.encode('utf-8')).hexdigest()
+    if page_hash in page_hashes:
+        with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
+            log_file.write(f"[DUPLICATE] Motivo: Exact duplicate hash → {url}\n")
+        return []
+    page_hashes.add(page_hash)
+
+    # NEAR DUPLICATE DETECTION
+    fingerprint = simhash(tokens)
+    for existing in simhashes:
+        if hamming_distance(fingerprint, existing) <= 3:
+            with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
+                log_file.write(f"[DUPLICATE] Motivo: Near duplicate (SimHash) → {url}\n")
+            return []
+    simhashes.add(fingerprint)
 
     word_counter.update(tokens)
     word_count = len(tokens)
