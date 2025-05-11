@@ -195,6 +195,10 @@ def is_valid(url):
             log_reason("Trap: /events/category/.../YYYY-MM")
             return False
 
+        if "/-/commit/" in path and "view=" in query:
+            log_reason("GitLab commit diff view")
+            return False
+
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
