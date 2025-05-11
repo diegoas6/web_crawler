@@ -203,6 +203,10 @@ def is_valid(url):
             log_reason("Trap: /events/category/.../YYYY-MM")
             return False
 
+        if re.search(r'/-/(blob|blame|raw|commits|tree)/', path) and "README.md" in path:
+            log_reason("Trap: GitLab redundant README views")
+            return False
+
         # GitLab commit and tree views
         if "/-/commit/" in path:
             log_reason("Trap: GitLab commit view")
