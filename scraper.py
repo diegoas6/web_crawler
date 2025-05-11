@@ -167,14 +167,11 @@ def is_valid(url):
         bad_params = {"share=", "action=login", "pwd=", "format=",
                       "action=download", "upname=", "ical=", "action=edit",
                       "replytocom=", "print=", "session=", "redirect_to=",
-                      "post_type=", "tribe-bar-date=", "eventDisplay=past"}
+                      "post_type=", "tribe-bar-date=", "eventDisplay=past",
+                      "do=media", "tab_files=", "image=", "do=diff", "difftype="}
 
         if any(p in query for p in bad_params):
             log_reason("Query bad parameters")
-            return False
-
-        if "do=diff" in query or "difftype=" in query:
-            log_reason("Diff page in DokuWiki or similar")
             return False
 
         if re.search(r'/day/(19|20)\d{2}-\d{2}-\d{2}', path):
@@ -186,12 +183,10 @@ def is_valid(url):
             log_reason("Trap: repeated path segments")
             return False
 
-        # Trap: fechas específicas en /events/
         if re.search(r'/events?/\d{4}-\d{2}-\d{2}', path):
             log_reason("Trap: /event(s)/ with specific date")
             return False
 
-        # Trap: /events/month/
         if re.search(r'/events?/month(/\\d{4}-\\d{2})?/?$', path):
             log_reason("Trap : /events/month/")
             return False
@@ -209,7 +204,6 @@ def is_valid(url):
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
-
 
     except Exception as e:
         with open("filtered_urls.log", "a", encoding="utf-8") as log_file:  ### CAMBIO: Registro de error
