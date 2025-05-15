@@ -8,6 +8,7 @@ from queue import Queue, Empty
 from utils import get_logger, get_urlhash, normalize
 from scraper import is_valid
 
+
 class Frontier(object):
     def __init__(self, config, restart):
         self.logger = get_logger("FRONTIER")
@@ -15,7 +16,7 @@ class Frontier(object):
         self.to_be_downloaded = list()
         self.lock = RLock()
         self.last_access = {}
-        
+
         if not os.path.exists(self.config.save_file) and not restart:
             # Save file does not exist, but request to load save.
             self.logger.info(
@@ -42,10 +43,11 @@ class Frontier(object):
         ''' This function can be overridden for alternate saving techniques. '''
         total_count = len(self.save)
         tbd_count = 0
-        for url, completed in self.save.values():
-            if not completed and is_valid(url):
-                self.to_be_downloaded.append(url)
-                tbd_count += 1
+        with self.lock:
+            for url, completed in self.save.values():
+                if not completed and is_valid(url):
+                    self.to_be_downloaded.append(url)
+                    tbd_count += 1
         self.logger.info(
             f"Found {tbd_count} urls to be downloaded from {total_count} "
             f"total urls discovered.")
@@ -55,16 +57,16 @@ class Frontier(object):
             try:
                 return self.to_be_downloaded.pop()
             except IndexError:
-               return None
+                return None
 
     def add_url(self, url):
         url = normalize(url)
         urlhash = get_urlhash(url)
         with self.lock:
             if urlhash not in self.save:
-               self.save[urlhash] = (url, False)
-               self.save.sync()
-               self.to_be_downloaded.append(url)
+                self.save[urlhash] = (url, False)
+                self.save.sync()
+                self.to_be_downloaded.append(url)
 
     def mark_url_complete(self, url):
         urlhash = get_urlhash(url)
