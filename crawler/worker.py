@@ -22,6 +22,7 @@ class Worker(Thread):
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
+                scraper.save_stats()
                 break
 
             if not isinstance(tbd_url, str):

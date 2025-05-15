@@ -99,7 +99,7 @@ def extract_next_links(url, resp):
     # Exact duplicate
     page_hash = hashlib.sha256(text.encode('utf-8')).hexdigest()
     if page_hash in page_hashes:
-        print("Exact duplicate hash → {url}\n")
+        print(f"Exact duplicate hash → {url}\n")
         with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
             log_file.write(f"[DUPLICATE] Motivo: Exact duplicate hash → {url}\n")
         return []
@@ -109,7 +109,7 @@ def extract_next_links(url, resp):
     fingerprint = simhash(tokens)
     for existing in simhashes:
         if hamming_distance(fingerprint, existing) <= 3:
-            print("Near duplicate (SimHash) → {url}\n")
+            print(f"Near duplicate (SimHash) → {url}\n")
             with open("filtered_urls.log", "a", encoding="utf-8") as log_file:
                 log_file.write(f"[DUPLICATE] Motivo: Near duplicate (SimHash) → {url}\n")
             return []
@@ -215,8 +215,8 @@ def is_valid(url):
             log_reason("Low-value personal photo page (epstein/pix)")
             return False
 
-        if "/epstein/pix/" in path:
-            log_reason("Low-value personal photo page (epstein/pix)")
+        if any(part in path.lower() for part in ["/pix/", "/photos/", "/gallery/"]):
+            log_reason("Trap: low-value image folder")
             return False
 
         # GitLab commit and tree views
